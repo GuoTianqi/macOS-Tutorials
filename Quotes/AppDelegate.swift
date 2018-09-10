@@ -17,7 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to initialize your application
 
         if let button = statusItem.button {
-            button.image = NSImage(named: "StatusBarButtonImage")
+            button.image = NSImage(named: NSImage.Name("StatusBarButtonImage"))
             button.target = self
             button.action = #selector(AppDelegate.togglePopover(_:))
         }

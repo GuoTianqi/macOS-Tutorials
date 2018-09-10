@@ -29,6 +29,7 @@ class QuotesViewController: NSViewController {
     }
 }
 
+// MARK:- freshController
 extension QuotesViewController {
     static func freshController() -> QuotesViewController {
         let stroyboard = NSStoryboard(name: NSStoryboard.Name("Main"), bundle: nil)
