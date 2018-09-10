@@ -9,7 +9,7 @@
 import Cocoa
 
 class QuotesViewController: NSViewController {
-    @IBOutlet var textLabel: NSTextField!
+    @IBOutlet weak var textLabel: NSTextField!
     
     let quotes = Quote.all
     var currentQuoteIndex: Int = 0 {
