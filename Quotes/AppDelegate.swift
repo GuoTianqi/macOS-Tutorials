@@ -9,9 +9,11 @@
 import Cocoa
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let popover = NSPopover()
+    
+    var eventMonitor: EventMonitor?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -22,6 +24,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(AppDelegate.togglePopover(_:))
         }
         popover.contentViewController = QuotesViewController.freshController()
+        popover.delegate = self
+        
+        eventMonitor = EventMonitor(mask: [.leftMouseDown, .rightMouseDown]) {
+            [weak self] event in
+            if let strongSelf = self, strongSelf.popover.isShown {
+                strongSelf.closePopover(sender: event)
+            }
+        }
         // construcMenu()
     }
 
@@ -55,11 +65,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func showPopover(sender: Any?) {
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.maxY)
+            eventMonitor?.start()
         }
     }
     
     func closePopover(sender: Any?) {
         popover.performClose(sender)
+        eventMonitor?.stop()
+    }
+    
+    func popoverDidShow(_ notification: Notification) {
+        // make the popover get focus
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
