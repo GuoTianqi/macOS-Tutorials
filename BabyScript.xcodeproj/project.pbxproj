@@ -12,6 +12,8 @@
 		7E0449AC2146B1FC006466CE /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0449AB2146B1FC006466CE /* Document.swift */; };
 		7E0449AE2146B1FD006466CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7E0449AD2146B1FD006466CE /* Assets.xcassets */; };
 		7E0449B12146B1FD006466CE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7E0449AF2146B1FD006466CE /* Main.storyboard */; };
+		7E0449BA214815D7006466CE /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0449B9214815D7006466CE /* WindowController.swift */; };
+		7EF7E69F21497498004A5D7B /* WordCountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF7E69E21497498004A5D7B /* WordCountViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +25,8 @@
 		7E0449B02146B1FD006466CE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7E0449B22146B1FD006466CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7E0449B32146B1FD006466CE /* BabyScript.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BabyScript.entitlements; sourceTree = "<group>"; };
+		7E0449B9214815D7006466CE /* WindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
+		7EF7E69E21497498004A5D7B /* WordCountViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordCountViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +66,8 @@
 				7E0449AF2146B1FD006466CE /* Main.storyboard */,
 				7E0449B22146B1FD006466CE /* Info.plist */,
 				7E0449B32146B1FD006466CE /* BabyScript.entitlements */,
+				7E0449B9214815D7006466CE /* WindowController.swift */,
+				7EF7E69E21497498004A5D7B /* WordCountViewController.swift */,
 			);
 			path = BabyScript;
 			sourceTree = "<group>";
@@ -136,7 +142,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EF7E69F21497498004A5D7B /* WordCountViewController.swift in Sources */,
 				7E0449AA2146B1FC006466CE /* ViewController.swift in Sources */,
+				7E0449BA214815D7006466CE /* WindowController.swift in Sources */,
 				7E0449A82146B1FC006466CE /* AppDelegate.swift in Sources */,
 				7E0449AC2146B1FC006466CE /* Document.swift in Sources */,
 			);
