@@ -167,7 +167,7 @@ extension ViewController {
       (result) in
       if result == NSFileHandlingPanelOKButton {
         self.selectedFolder = panel.urls[0]
-        print(self.selectedFolder)
+        print(self.selectedFolder ?? "")
       }
     }
   }
