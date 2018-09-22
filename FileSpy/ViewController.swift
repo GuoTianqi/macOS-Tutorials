@@ -99,11 +99,38 @@ class ViewController: NSViewController {
 extension ViewController {
 
   func contentsOf(folder: URL) -> [URL] {
-    return []
+    let fileManager = FileManager.default
+
+    do {
+      let contents = try fileManager.contentsOfDirectory(atPath: folder.path)
+      print("contents: \(contents)")
+      let urls = contents.map { return folder.appendingPathComponent($0) }
+      print("urls: \(urls)")
+      return urls
+    } catch {
+      return []
+    }
   }
 
   func infoAbout(url: URL) -> String {
-    return "No information available for \(url.path)"
+    let fileManager = FileManager.default
+
+    do {
+      let attributes = try fileManager.attributesOfItem(atPath: url.path)
+      var report: [String] = ["\(url.path)", ""]
+
+      for (key, value) in attributes {
+        if key.rawValue == "NSFileExtendedAttributes" {
+          print("\(key.rawValue):\t \(value)")
+          continue
+        }
+        report.append("\(key.rawValue):\t \(value)")
+      }
+      
+      return report.joined(separator: "\n")
+    } catch {
+      return "No information available for \(url.path)"
+    }
   }
 
   func formatInfoText(_ text: String) -> NSAttributedString {
@@ -129,6 +156,20 @@ extension ViewController {
 extension ViewController {
 
   @IBAction func selectFolderClicked(_ sender: Any) {
+    guard let window = view.window else { return }
+
+    let panel = NSOpenPanel()
+    panel.canChooseFiles = false
+    panel.canChooseDirectories = true
+    panel.allowsMultipleSelection = false
+
+    panel.beginSheetModal(for: window) {
+      (result) in
+      if result == NSFileHandlingPanelOKButton {
+        self.selectedFolder = panel.urls[0]
+        print(self.selectedFolder)
+      }
+    }
   }
 
   @IBAction func toggleShowInvisibles(_ sender: NSButton) {
@@ -161,6 +202,15 @@ extension ViewController: NSTableViewDelegate {
 
   func tableView(_ tableView: NSTableView, viewFor
     tableColumn: NSTableColumn?, row: Int) -> NSView? {
+    let item = filesList[row]
+    let fileIcon = NSWorkspace.shared().icon(forFile: item.path)
+
+    if let cell = tableView.make(withIdentifier: "FileCell", owner: nil) as? NSTableCellView {
+      cell.textField?.stringValue = item.lastPathComponent
+      cell.imageView?.image = fileIcon
+
+      return cell
+    }
     return nil
   }
 
