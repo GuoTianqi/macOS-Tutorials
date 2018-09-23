@@ -104,7 +104,9 @@ extension ViewController {
     do {
       let contents = try fileManager.contentsOfDirectory(atPath: folder.path)
       print("contents: \(contents)")
-      let urls = contents.map { return folder.appendingPathComponent($0) }
+      let urls = contents
+        .filter { return showInvisibles ? true: $0.first != "." }
+        .map { return folder.appendingPathComponent($0) }
       print("urls: \(urls)")
       return urls
     } catch {
@@ -134,14 +136,14 @@ extension ViewController {
   }
 
   func formatInfoText(_ text: String) -> NSAttributedString {
-    let paragraphStyle = NSMutableParagraphStyle.default().mutableCopy() as? NSMutableParagraphStyle
+    let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as? NSMutableParagraphStyle
     paragraphStyle?.minimumLineHeight = 24
     paragraphStyle?.alignment = .left
     paragraphStyle?.tabStops = [ NSTextTab(type: .leftTabStopType, location: 240) ]
 
-    let textAttributes: [String: Any] = [
-      NSFontAttributeName: NSFont.systemFont(ofSize: 14),
-      NSParagraphStyleAttributeName: paragraphStyle ?? NSParagraphStyle.default()
+    let textAttributes: [NSAttributedString.Key: Any] = [
+      NSAttributedString.Key.font: NSFont.systemFont(ofSize: 14),
+      NSAttributedString.Key.paragraphStyle: paragraphStyle ?? NSParagraphStyle.default
     ]
 
     let formattedText = NSAttributedString(string: text, attributes: textAttributes)
@@ -165,7 +167,7 @@ extension ViewController {
 
     panel.beginSheetModal(for: window) {
       (result) in
-      if result == NSFileHandlingPanelOKButton {
+      if result == NSApplication.ModalResponse.OK {
         self.selectedFolder = panel.urls[0]
         print(self.selectedFolder ?? "")
       }
@@ -173,17 +175,56 @@ extension ViewController {
   }
 
   @IBAction func toggleShowInvisibles(_ sender: NSButton) {
+    showInvisibles = (sender.state == NSControl.StateValue.on)
+    
+    if let selectedFolder = selectedFolder {
+        filesList = contentsOf(folder: selectedFolder)
+        selectedItem = nil
+        tableView.reloadData()
+    }
   }
 
   @IBAction func tableViewDoubleClicked(_ sender: Any) {
+    if tableView.selectedRow < 0 { return }
+    
+    let selectedItem = filesList[tableView.selectedRow]
+    if selectedItem.hasDirectoryPath {
+        selectedFolder = selectedItem
+    }
   }
 
   @IBAction func moveUpClicked(_ sender: Any) {
+    if selectedFolder?.path == "/" {
+        return
+    }
+    selectedFolder = selectedFolder?.deletingLastPathComponent()
   }
 
   @IBAction func saveInfoClicked(_ sender: Any) {
+    guard let window = view.window else { return }
+    guard let selectedItem = selectedItem else { return }
+    
+    let panel = NSSavePanel()
+    
+    panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+    panel.nameFieldStringValue = selectedItem
+    .deletingPathExtension()
+    .appendingPathExtension("fs.txt")
+    .lastPathComponent
+    
+    panel.beginSheetModal(for: window) {
+        (result) in
+        if result == NSApplication.ModalResponse.OK,
+            let url = panel.url {
+                do {
+                    let infoAsText = self.infoAbout(url: selectedItem)
+                    try infoAsText.write(to: url, atomically: true, encoding: .utf8)
+                } catch {
+                    self.showErrorDialogIn(window: window, title: "Unable to save file", message: error.localizedDescription)
+                }
+            }
+        }
   }
-
 }
 
 // MARK: - NSTableViewDataSource
@@ -203,9 +244,10 @@ extension ViewController: NSTableViewDelegate {
   func tableView(_ tableView: NSTableView, viewFor
     tableColumn: NSTableColumn?, row: Int) -> NSView? {
     let item = filesList[row]
-    let fileIcon = NSWorkspace.shared().icon(forFile: item.path)
+    let fileIcon = NSWorkspace.shared.icon(forFile: item.path)
 
-    if let cell = tableView.make(withIdentifier: "FileCell", owner: nil) as? NSTableCellView {
+    if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("FileCell"), owner: nil)
+        as? NSTableCellView {
       cell.textField?.stringValue = item.lastPathComponent
       cell.imageView?.image = fileIcon
 
@@ -274,7 +316,27 @@ extension ViewController {
   }
   
   private func urlForDataStorage() -> URL? {
-    return nil
+    let fileManager = FileManager.default
+    
+    guard let folder = fileManager.urls(
+        for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return nil
+    }
+    
+    let appFolder = folder.appendingPathComponent("FileSpy")
+    var isDirectory: ObjCBool = false
+    let folderExists = fileManager.fileExists(atPath: appFolder.path, isDirectory: &isDirectory)
+    if !folderExists || !isDirectory.boolValue {
+        do {
+            try fileManager.createDirectory(at: appFolder, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            return nil
+        }
+    }
+
+    let dataFileUrl = appFolder.appendingPathComponent("StoredState.txt")
+    
+    return dataFileUrl
   }
 
 }
